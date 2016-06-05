@@ -2,6 +2,7 @@ package com.baizhong.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils;
@@ -33,7 +34,6 @@ public class AddActivity extends Activity implements View.OnClickListener {
 
     private ArrayList<String> mResults = new ArrayList<String>();
     private static final int REQUEST_CODE = 732;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,7 +80,7 @@ public class AddActivity extends Activity implements View.OnClickListener {
         if (TextUtils.isEmpty(text)) {
             CustomToast.instance(this, "请输入文件名", Toast.LENGTH_LONG);
         } else {
-            if(!TextUtils.isEmpty(fileNames)){
+            if (!TextUtils.isEmpty(fileNames)) {
 
                 File rootFile = Environment.getExternalStorageDirectory();
                 if (rootFile.exists()) {
@@ -102,7 +102,7 @@ public class AddActivity extends Activity implements View.OnClickListener {
                 } else {
                     new CustomFile(text, fileNames).save();
                 }
-            }else{
+            } else {
                 new CustomFile(text, "").save();
             }
 //存储文件名到数据库 ，然后close 这个activity
