@@ -2,6 +2,7 @@ package com.baizhong.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,12 +15,15 @@ import com.baizhong.adapter.CustomRecyclerViewAdapter;
 import com.baizhong.entity.Cpath;
 import com.baizhong.entity.CustomFile;
 import com.baizhong.test.CustomToast;
+import com.baizhong.test.FileTask;
 import com.baizhong.test.R;
 import com.zfdang.multiple_images_selector.ImagesSelectorActivity;
 import com.zfdang.multiple_images_selector.SelectorSettings;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -33,12 +37,14 @@ public class GridActivity extends Activity implements CustomRecyclerViewAdapter.
     private CustomFile currentFile;
     private List<Cpath> pathList;
     private CustomRecyclerViewAdapter adapter;
-
+    private SharedPreferences share;
+    private SharedPreferences.Editor editor;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.acitivty_grid);
-
+        share = getSharedPreferences("path",MODE_PRIVATE);
+        editor = share.edit();
         init();
     }
 
@@ -78,7 +84,7 @@ public class GridActivity extends Activity implements CustomRecyclerViewAdapter.
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_grid_menu, menu);
-        return super.onCreateOptionsMenu(menu);
+        return true;
     }
 
     @Override
@@ -87,27 +93,35 @@ public class GridActivity extends Activity implements CustomRecyclerViewAdapter.
             case R.id.save:
                 CustomToast.instance(this, "save the file", Toast.LENGTH_SHORT);
                 saveCurrentFile();
-                finish();
-                break;
-            case R.id.settings:
+//                finish();
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
     private void saveCurrentFile() {
+        StringBuilder sb = new StringBuilder();
+        int noid = 0;
+        for (String str : files) {
+            File file = new File(str);
+                sb.append(str).append(",");
+        }
+        currentFile.setPath(sb.toString());
+        currentFile.save();
+        CustomToast.instance(this, "save the file_" + noid, Toast.LENGTH_SHORT);
     }
 
 
     @Override
     public void onItemClickListener(int position, int type, boolean isCamera) {
         if (isCamera) {
-            if (position < 5) {
-                //open fileSelector
-                CustomToast.instance(this, "carema", Toast.LENGTH_LONG);
-            } else {
-                CustomToast.instance(this, "carema not add", Toast.LENGTH_LONG);
-            }
+            //open fileSelector
+            CustomToast.instance(this, "carema", Toast.LENGTH_LONG);
+            Number = files.size();
+            if (Number < 5)
+                addImage();
+            else
+                CustomToast.instance(this, "have already 5 pics", Toast.LENGTH_LONG);
         } else {
             if (type == 0) {
                 //del the image
@@ -121,13 +135,15 @@ public class GridActivity extends Activity implements CustomRecyclerViewAdapter.
     }
 
     private ArrayList<String> mResults = new ArrayList<String>();
+    int Number;
 
     private void addImage() {
+        mResults.clear();
         CustomToast.instance(this, "in___", Toast.LENGTH_SHORT);
         // start multiple photos selector
         Intent intent = new Intent(this, ImagesSelectorActivity.class);
         // max number of images to be selected
-        intent.putExtra(SelectorSettings.SELECTOR_MAX_IMAGE_NUMBER, 5);
+        intent.putExtra(SelectorSettings.SELECTOR_MAX_IMAGE_NUMBER, 5 - Number);
         // min size of image which will be shown; to filter tiny images (mainly icons)
         intent.putExtra(SelectorSettings.SELECTOR_MIN_IMAGE_SIZE, 100000);
         // show camera or not
@@ -138,23 +154,38 @@ public class GridActivity extends Activity implements CustomRecyclerViewAdapter.
         startActivityForResult(intent, REQUEST_CODE);
     }
 
-    private void delFilePathAndFile(int position) {
-//        pathList.remove(position);
-        try {
-            CustomToast.instance(this, "del pics" + position + "___" + files.get(position), Toast.LENGTH_LONG);
-            files.remove(position);
-//            pathList.remove(position);
-            adapter.removeData(position);
-        } catch (Exception e) {
-            e.printStackTrace();
-            CustomToast.instance(this, ""+e.getMessage()+"____size"+files.size(), Toast.LENGTH_LONG);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                mResults = data.getStringArrayListExtra(SelectorSettings.SELECTOR_RESULTS);
+                assert mResults != null;
+                for (String str : mResults) {
+                    files.add(str);
+//                    adapter.addData(str);
+                }
+                HashSet<String> set = new HashSet<>(files);
+                files.clear();
+                files.addAll(set);
+                adapter.notifyItemRangeChanged(0, files.size());
+                // show results in textview
+//                StringBuilder sb = new StringBuilder();
+//                for (String result : mResults) {
+//                    sb.append(result).append(",");
+//                }
+//                fileNames = sb.toString();
+            }
         }
-//        StringBuilder sb = new StringBuilder();
-//        String[] list2array = (String[]) files.toArray();
-//       for (int i = 0;i<list2array.length;i++){
-//            sb.append(list2array[i]).append(",");
-//        }
-//        currentFile.setPath(sb.toString());
-//        currentFile.save();
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void delFilePathAndFile(int position) {
+        try {
+            adapter.removeData(position);
+
+            CustomToast.instance(this, files.size() + "", Toast.LENGTH_LONG);
+        } catch (Exception e) {
+            CustomToast.instance(this, e.getMessage() + files, Toast.LENGTH_LONG);
+        }
     }
 }

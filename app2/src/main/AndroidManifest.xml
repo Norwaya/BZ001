@@ -8,7 +8,11 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
+    <uses-sdk
+        android:minSdkVersion="14"
+        android:targetSdkVersion="23" />
     <application
+
         android:name="com.baizhong.activity.CoustomApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -29,12 +33,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.baizhong.activity.AddActivity" />
+        <activity
+            android:name="com.baizhong.activity.AddActivity"
+            android:theme="@android:style/Theme.Holo.Light.DarkActionBar" />
         <activity
             android:name="com.zfdang.multiple_images_selector.ImagesSelectorActivity"
             android:configChanges="orientation|screenSize" />
         <activity android:name="com.baizhong.activity.ShowImage" />
-        <activity android:name="com.baizhong.activity.GridActivity"/>
+        <activity
+            android:name="com.baizhong.activity.GridActivity"
+            android:theme="@android:style/Theme.Holo.Light.DarkActionBar" />
     </application>
 
 </manifest>
