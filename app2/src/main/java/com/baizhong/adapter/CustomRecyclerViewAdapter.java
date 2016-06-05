@@ -112,16 +112,16 @@ public class CustomRecyclerViewAdapter extends RecyclerView.Adapter {
         }
     }
 
-    public void addData(int position, String path) {
+    public void addData( String path) {
         files.add(path);
-
-        notifyItemInserted(files.size() - 2);
+//        notifyItemInserted(files.size()-1);
+//        notifyItemRangeChanged(0,files.size());
 
     }
 
     public void removeData(int position) {
-//        files.remove(position);
-        notifyItemRemoved(position-1);
+        files.remove(position);
+        notifyItemRemoved(position);
         notifyItemRangeChanged(0,files.size());
     }
 }
